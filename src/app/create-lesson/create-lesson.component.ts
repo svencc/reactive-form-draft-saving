@@ -32,8 +32,8 @@ export class CreateLessonComponent implements OnInit {
 
     this.form.valueChanges
       .pipe(
-        filter( () => this.form.valid ),
-        tap( validValue => Cookies.set(
+        filter(() => this.form.valid),
+        tap(validValue => Cookies.set(
           CreateLessonComponent.DRAFT_COOKIE, JSON.stringify(validValue)
         ))
       )
