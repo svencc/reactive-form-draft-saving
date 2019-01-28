@@ -1,27 +1,43 @@
 import {Component, OnInit} from '@angular/core';
-import {FormGroup, FormBuilder, Validators} from "@angular/forms";
+import {FormGroup, FormBuilder, Validators} from '@angular/forms';
+import {filter, tap} from 'rxjs/operators';
+import * as Cookies from 'cookies-js';
+
 
 @Component({
-    selector: 'create-lesson',
-    templateUrl: './create-lesson.component.html',
-    styleUrls: ['./create-lesson.component.css']
+  selector: 'create-lesson',
+  templateUrl: './create-lesson.component.html',
+  styleUrls: ['./create-lesson.component.css']
 })
 export class CreateLessonComponent implements OnInit {
 
-    form: FormGroup;
+  private static readonly DRAFT_COOKIE = 'create-lesson-draft';
+  form: FormGroup;
 
-    constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder) {
 
-        this.form = this.fb.group({
-            description: ['',Validators.required],
-            url: ['',Validators.required],
-            longDescription: ['']
-        });
+    this.form = this.fb.group({
+      description: ['', Validators.required],
+      url: ['', Validators.required],
+      longDescription: ['']
+    });
 
+  }
+
+  ngOnInit() {
+    const draft = Cookies.get(CreateLessonComponent.DRAFT_COOKIE);
+    if (draft) {
+      this.form.setValue(JSON.parse(draft));
     }
 
-    ngOnInit() {
-
-    }
+    this.form.valueChanges
+      .pipe(
+        filter( () => this.form.valid ),
+        tap( validValue => Cookies.set(
+          CreateLessonComponent.DRAFT_COOKIE, JSON.stringify(validValue)
+        ))
+      )
+      .subscribe();
+  }
 
 }
